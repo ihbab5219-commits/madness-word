@@ -63,7 +63,7 @@
     </form>
 
     <div id="results" class="results" role="region" aria-live="polite"></div>
-    <div class="small">Recent searches will appear here. A mysterious riddle hides within the poems — can you find it?</div>
+    <div class="small">Recent searches will appear here. Solve the hidden riddle in the poems!</div>
   </section>
 
   <audio id="whisperSound" loop>
@@ -118,7 +118,7 @@
       const userInput = q.value.trim();
       if(userInput !== ''){
         if(userInput.toLowerCase() === riddleAnswer.toLowerCase()){
-          addResult('🎉 Correct! You uncovered the hidden word from the poem. Send 0.0000002 to the creator to claim your reward.');
+          addResult('🎉 Correct! You uncovered the hidden word from the poem.');
           startWhisperEffect(); // effect triggers only on correct answer
         } else {
           showNextPoem();
@@ -127,4 +127,16 @@
       }
     });
 
-    document.getElementById('go
+    document.getElementById('go').addEventListener('click', ()=>{
+      form.dispatchEvent(new Event('submit'));
+    });
+
+    q.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); form.dispatchEvent(new Event('submit')); } });
+
+    if (typeof window !== 'undefined') {
+      console.log('🧩 A riddle awaits in the poems! Can you spot the hidden word?');
+      document.title += ' 🔍';
+    }
+  </script>
+</body>
+</html>
