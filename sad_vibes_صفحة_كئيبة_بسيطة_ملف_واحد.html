@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Madness Word – Retro Edition</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:'Courier New', monospace; background-color: #330000; color:#FFF;}
+
+    body{
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh;
+      position:relative;
+      background-image: repeating-linear-gradient(45deg, rgba(255,0,0,0.1) 0, rgba(255,0,0,0.1) 1px, transparent 1px, transparent 20px);
+      overflow: hidden;
+      background-position: 50% 50%;
+    }
+
+    .search-card{
+      width:100%; max-width:800px; background:#220000; padding:30px; border-radius:12px; position: relative; z-index: 2;
+      box-shadow: 0 0 20px #FF0000;
+      border: 2px solid #990000;
+    }
+
+    .brand{display:flex; gap:16px; align-items:center; margin-bottom:20px;}
+    .logo{flex:1; text-align:center; border-radius:8px;background:#110000;display:grid;place-items:center;font-weight:900; font-size:24px; color:#FF0000; font-family:'Courier New', monospace;}
+
+    form.search{display:flex; flex-direction:column; gap:12px; margin-bottom:12px; width:100%; position: relative;}
+    .q{flex:1;padding:12px 14px;border-radius:8px;border:1px solid #FF0000;background:#110000;color:#FF5555;font-size:16px; font-family:'Courier New', monospace;} 
+    .btn{padding:12px 20px;border-radius:8px;border:0;background:#330000;color:#FF5555;font-weight:700;cursor:pointer;transition:0.2s; font-family:'Courier New', monospace;}
+
+    .q::placeholder { color: #FF8888; font-style: italic; }
+
+    .results{margin-top:20px; display:grid; gap:12px; max-height:400px; overflow-y:auto; border:1px solid #FF0000; padding:10px; border-radius:8px; background:#110000;}
+    .result{background:#220000; padding:10px; border-radius:6px; border:1px solid #FF5555; color:#FFAAAA; font-family:'Courier New', monospace; white-space: pre-wrap;}
+
+    .small{margin-top:14px;color:#FF8888; font-size:13px}
+
+    .corner-drawing{position:absolute;width:60px;height:60px;background: #000;border-radius:50%;box-shadow: 0 0 15px 3px #550000 inset, 0 0 25px 5px #880000; z-index:0;}
+    .top-left{top:10px; left:10px;}
+    .top-right{top:10px; right:10px;}
+    .bottom-left{bottom:10px; left:10px;}
+    .bottom-right{bottom:10px; right:10px;}
+
+    @media(max-width:640px){ .q{font-size:14px} }
+  </style>
+</head>
+<body>
+  <div class="corner-drawing top-left"></div>
+  <div class="corner-drawing top-right"></div>
+  <div class="corner-drawing bottom-left"></div>
+  <div class="corner-drawing bottom-right"></div>
+
+  <section class="search-card" aria-label="Madness Word search">
+    <div class="brand">
+      <div class="logo">Madness Word</div>
+    </div>
+
+    <form id="searchForm" class="search" onsubmit="return false;">
+      <input id="q" class="q" placeholder="Search logs or solve the riddle..." autocomplete="off" />
+      <button id="go" class="btn">Search</button>
+    </form>
+
+    <div id="results" class="results" role="region" aria-live="polite"></div>
+    <div class="small">Recent searches will appear here. A mysterious riddle hides within the poems — can you find it?</div>
+  </section>
+
+  <audio id="whisperSound" loop>
+    <source src="https://www.soundjay.com/human/whisper-01.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const poems = [
+      `Life is a circus of shattered mirrors,\nLaughing shadows dance in hollow corridors,\nTime ticks madly in crimson rivers,\nSanity drowns while chaos roars.\n\nDreams crumble like burnt paper,\nEchoes whisper secrets to no one,\nWe walk the edge, a thin vapor,\nIn a world that spins, yet is undone.`,
+      `My city breaths in foggy alleys,\nNeon lights flicker like trembling hearts,\nRoofs cling to the sky with desperate hands,\nAnd the streets whisper forgotten tales.\n\nWindows weep the tears of yesterday,\nSirens sing lullabies to the lost,\nI wander through this urban maze,\nWhere every shadow knows my name.`,
+      `The world spins madly under fractured skies,\nOceans roar with laughter and despair,\nMountains twist into jagged sighs,\nAnd whispers of dreams float through the air.\n\nTime bends, reality shivers,\nColors bleed beyond reason,\nEvery heartbeat quivers,\nIn the theater of existence, chaos is the season.`
+    ];
+
+    const riddleAnswer = poems[1].split('\n')[0].split(' ')[2];
+    let currentIndex = 0;
+
+    function addResult(text){
+      const div = document.createElement('div');
+      div.className = 'result';
+      div.textContent = text;
+      results.prepend(div);
+    }
+
+    function showNextPoem(){
+      addResult(poems[currentIndex]);
+      currentIndex = (currentIndex + 1) % poems.length;
+    }
+
+    const form = document.getElementById('searchForm');
+    const q = document.getElementById('q');
+    const whisper = document.getElementById('whisperSound');
+
+    let approachSpeed = 0.05;
+    let position = 0.5;
+
+    function animateWhisper(){
+      position += approachSpeed;
+      if(position >= 0.8){
+        approachSpeed = 0.2;
+      }
+      document.body.style.backgroundPosition = `${position * 100}% ${position * 100}%`;
+      requestAnimationFrame(animateWhisper);
+    }
+
+    function startWhisperEffect(){
+      whisper.volume = 0.2;
+      whisper.play();
+      animateWhisper();
+    }
+
+    form.addEventListener('submit', ()=>{
+      const userInput = q.value.trim();
+      if(userInput !== ''){
+        if(userInput.toLowerCase() === riddleAnswer.toLowerCase()){
+          addResult('🎉 Correct! You uncovered the hidden word from the poem. Send 0.0000002 to the creator to claim your reward.');
+          startWhisperEffect(); // effect triggers only on correct answer
+        } else {
+          showNextPoem();
+        }
+        q.value = '';
+      }
+    });
+
+    document.getElementById('go
